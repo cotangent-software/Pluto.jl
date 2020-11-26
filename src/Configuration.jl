@@ -40,6 +40,7 @@ Security settings for the HTTP server. Options are:
 Note that Pluto is quickly evolving software, maintained by designers, educators and enthusiasts — not security experts. If security is a serious concern for your application, then we recommend running Pluto inside a container and verifying the relevant security aspects of Pluto yourself.
 """
 Base.@kwdef mutable struct SecurityOptions
+    secret::Union{Nothing, String} = nothing
     require_secret_for_open_links::Bool = true
     require_secret_for_access::Bool = true
 end

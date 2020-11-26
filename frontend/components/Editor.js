@@ -975,7 +975,7 @@ export class Editor extends Component {
                     <a href="./">
                         <h1><img id="logo-big" src="img/logo.svg" alt="Pluto.jl" /><img id="logo-small" src="img/favicon_unsaturated.svg" /></h1>
                     </a>
-                    <${FilePicker}
+                    <!--<${FilePicker}
                         client=${this.client}
                         value=${this.state.notebook.in_temp_dir ? "" : this.state.notebook.path}
                         on_submit=${this.submit_file_change}
@@ -985,7 +985,7 @@ export class Editor extends Component {
                         }}
                         placeholder="Save notebook..."
                         button_label=${this.state.notebook.in_temp_dir ? "Choose" : "Move"}
-                    />
+                    />-->
                     <button class="toggle_export" title="Export..." onClick=${() => this.setState({ export_menu_open: !export_menu_open })}>
                         <span></span>
                     </button>

@@ -40,8 +40,8 @@ function open(session::ServerSession, path::AbstractString; run_async=true, comp
     nb
 end
 
-function new(session::ServerSession; run_async=true)
-    nb = emptynotebook()
+function new(session::ServerSession; path::Union{Nothing,String}=nothing, run_async=true)
+    nb = emptynotebook((isnothing(path) ? [] : [path])...)
     update_save_run!(session, nb, nb.cells; run_async=run_async, prerender_text=true)
     session.notebooks[nb.notebook_id] = nb
 

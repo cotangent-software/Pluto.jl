@@ -117,6 +117,10 @@ function run(session::ServerSession)
     host = session.options.server.host
     port = session.options.server.port
 
+    if !isnothing(session.options.security.secret)
+        session.secret = session.options.security.secret
+    end
+
     hostIP = parse(Sockets.IPAddr, host)
     if port === nothing
         port, serversocket = Sockets.listenany(hostIP, UInt16(1234))
