@@ -39,6 +39,7 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, ...props }) {
             <${Text}
                 className="${selected === tree.id ? 'file-tree-entry-selected ' : ''}file-tree-entry"
                 onclick=${onEntryClick}
+                draggable="true"
             >
                 ${fileIcon}
                 ${tree.type === 'directory' && html`<${Icon} name="${isExpanded() ? 'caret-down' : 'caret-right'}"/>`}

@@ -2,11 +2,12 @@ import { html, useState } from '../deps/Preact.js';
 import Alert from '../ui/Alert.js';
 import Container from '../ui/Container.js';
 import Grid from '../ui/Grid.js';
+import Spinner from '../ui/Spinner.js';
 import Text from '../ui/Text.js';
 
-function NewFileButton({ children, backgroundImage='', backgroundOpacity=0.2, ...props }) {
+function NewFileButton({ children, onClick, backgroundImage='', backgroundOpacity=0.2, ...props }) {
     return html`
-        <button class="new-file-button">
+        <button class="new-file-button" onclick=${onClick}>
             <div class="new-file-button-background" style="background-image: url(${backgroundImage}); filter: opacity(${backgroundOpacity})"/>
             <div class="new-file-button-text">
                 <span>${children}</span>
@@ -15,7 +16,8 @@ function NewFileButton({ children, backgroundImage='', backgroundOpacity=0.2, ..
     `;
 }
 
-function NewFile({ ...props }) {
+function NewFile({ onCreate=(d)=>{}, ...props }) {
+    const [loading, setLoading] = useState(false);
     const [fileName, setFileName] = useState('');
     const [showExtensionWarning, setShowExtensionWarning] = useState(false);
 
@@ -28,6 +30,25 @@ function NewFile({ ...props }) {
         else {
             setShowExtensionWarning(false);
         }
+    }
+
+    function correctedFileName(fileName) {
+        if(fileName.slice(fileName.length-3, fileName.length) !== '.jl') {
+            return fileName + (fileName.charAt(fileName.length-1) === '.' ? '' : '.') + 'jl';
+        }
+        return fileName;
+    }
+
+    function handleCreatePlutoNotebook() {
+        setLoading(true);
+        fetch('/new' + (fileName !== '' ? '?path=' + encodeURIComponent(correctedFileName(fileName)) : ''))
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.path) {
+                    onCreate(data);
+                }
+                setLoading(false);
+            });
     }
 
     return html`
@@ -47,7 +68,7 @@ function NewFile({ ...props }) {
             <${Container}>
                 <${Grid.Row}>
                     <${Grid.Col} sm=6>
-                        <${NewFileButton} backgroundImage="/img/favicon.svg">Pluto Notebook</${NewFileButton}>
+                        <${NewFileButton} onClick=${handleCreatePlutoNotebook} backgroundImage="/img/favicon.svg">${loading ? html`<${Spinner}/>` : 'Pluto Notebook'}</${NewFileButton}>
                     </${Grid.Col}>
                     <${Grid.Col} sm=6>
                         <${NewFileButton} backgroundImage="/lab/deps/bootstrap-icons/file-earmark-text.svg" backgroundOpacity=0.1>Text File</${NewFileButton}>

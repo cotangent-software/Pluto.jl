@@ -9,6 +9,13 @@ import IconButton from '../ui/IconButton.js';
 import Spinner from '../ui/Spinner.js';
 import NewFile from './NewFile.js';
 
+function getOpenUrl(path) {
+    return `http://${Config.plutoHost}/open?path=${encodeURIComponent(path.slice(1))}`;
+}
+function getNameFromPath(path) {
+    return path.split('/').reverse()[0];
+}
+
 function Editor(props) {
     const [fileTree, setFileTree] = useState({});
     const [fileSelected, setFileSelected] = useState('');
@@ -17,12 +24,16 @@ function Editor(props) {
     const [tabIndex, setTabIndex] = useState(0);
     const [openTabs, setOpenTabs] = useState([]);
 
+    const [newNotebookData, setNewNotebookData] = useState(null);
+
     useEffect(() => {
         handleFileRefresh();
     }, [setFileTree]);
 
-    function handleFileRefresh() {
-        setFileTree({});    
+    function handleFileRefresh(showLoader=true) {
+        if(showLoader) {
+            setFileTree({});    
+        }
         fetch('/tree')
             .then(response => response.json())
             .then(data => {
@@ -46,9 +57,9 @@ function Editor(props) {
                 const _openTabs = [ ...openTabs ];
                 _openTabs.push({
                     type: 'frame',
-                    url: `http://${Config.plutoHost}/open?path=${encodeURIComponent(path.slice(1))}`,
+                    url: getOpenUrl(path),
                     path,
-                    name: path.split('/').reverse()[0]
+                    name: getNameFromPath(path)
                 });
                 setOpenTabs(_openTabs);
                 setTabIndex(_openTabs.length-1);
@@ -65,11 +76,17 @@ function Editor(props) {
             _openTabs.push({
                 type: 'component',
                 component: NewFile,
-                name: "New File"
+                name: "New File",
+                props: {
+                    onCreate: handleFileCreate
+                }
             });
             setOpenTabs(_openTabs);
             setTabIndex(_openTabs.length-1);
         }
+    }
+    function handleFileCreate(notebookData) {
+        setNewNotebookData(notebookData);
     }
     function handleTreeExpand(tree, expanded) {
         const _treeExpanded = { ...treeExpanded };
@@ -86,10 +103,32 @@ function Editor(props) {
         const _openTabs = [ ...openTabs ];
         _openTabs.splice(idx, 1);
         setOpenTabs(_openTabs);
-        if(idx <= tabIndex) setTabIndex(tabIndex - 1);
+        if(idx <= tabIndex) setTabIndex(tabIndex > 0 ? tabIndex - 1 : 0);
+    }
+    function handleTabRearrange(tabArrangement) {
+        const _openTabs = [ ...openTabs ];
+        for(let i=0; i<tabArrangement.length; i++) {
+            _openTabs[i] = openTabs[tabArrangement[i]];
+        }
+        setOpenTabs(_openTabs);
+        setTabIndex(tabArrangement.indexOf(tabIndex));
     }
     function handleFrameLoad(idx) {
         
+    }
+
+    if(newNotebookData) {
+        const newTabIndex = openTabs.map(x => x.component).indexOf(NewFile);
+        const _openTabs = [ ...openTabs ];
+        _openTabs.splice(newTabIndex, 1, {
+            type: 'frame',
+            url: getOpenUrl(newNotebookData.path),
+            path: newNotebookData.path,
+            name: getNameFromPath(newNotebookData.path)
+        });
+        setOpenTabs(_openTabs);
+        handleFileRefresh(false);
+        setNewNotebookData(null);
     }
 
     return html`
@@ -120,7 +159,8 @@ function Editor(props) {
                     tab="${tabIndex}"
                     tabLabels="${openTabs.map(x => x.name)}"
                     onClick=${handleTabClick}
-                    onClose=${handleTabClose}/>
+                    onClose=${handleTabClose}
+                    onTabRearrange=${handleTabRearrange}/>
                 ${openTabs.map((tabData, i) => (
                     html`
                         <${TabPanel} tab=${tabIndex} index=${i} style="flex-grow: 1; position: relative">

@@ -187,7 +187,6 @@ function http_router_for(session::ServerSession)
         security.require_secret_for_open_links
     ) do request::HTTP.Request
         notebook = SessionActions.new(session; to_symbol_dict(HTTP.queryparams(HTTP.URI(request.target)))...)
-        println(notebook.path)
         json_response(Dict(
             "id" => string(notebook.notebook_id),
             "path" => to_notebook_root_relative(session, notebook.path)
