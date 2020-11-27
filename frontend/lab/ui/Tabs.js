@@ -1,7 +1,7 @@
 import { html } from '../deps/Preact.js';
 import IconButton from './IconButton.js';
 
-function Tabs({ tab, tabLabels, onClick, onClose=()=>{}, className, ...props }) {
+function Tabs({ tab, tabLabels, onClick, onClose=(i)=>{}, className, ...props }) {
     className = className || '';
     tabLabels = tabLabels || [];
     return html`
@@ -13,7 +13,7 @@ function Tabs({ tab, tabLabels, onClick, onClose=()=>{}, className, ...props }) 
                             ${content}
                             <${IconButton} icon="x" className="ml-1" buttonSize=20 onClick=${(e) => {
                                 e.stopPropagation();
-                                onClose(i)
+                                onClose(i);
                             }}/>
                         </div>
                     </div>

@@ -57,7 +57,7 @@ function asset_response(path)
         push!(response.headers, "Access-Control-Allow-Origin" => "*")
         response
     catch e
-        HTTP.Response(404, "Not found!")
+        asset_response(project_relative_path("frontend/lab", "index.html"))
     end
 end
 

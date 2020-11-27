@@ -25,6 +25,49 @@ html, body {
 }
 
 
+/***** views/NewFile.js *****/
+.new-file-root {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding-left: 130px;
+}
+.new-file-container {
+    max-width: 500px;
+}
+.new-file-button {
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    width: 100%;
+    padding-top: 95%;
+    position: relative;
+    border: 1px solid grey;
+    transition: background-color 0.2s;
+}
+.new-file-button:hover {
+    background-color: #ededed;
+}
+.new-file-button:active {
+    background-color: #f9f9f9;
+}
+.new-file-button-background {
+    position: absolute;
+    inset: 12%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: opacity(0.2);
+}
+.new-file-button-text {
+    position: absolute;
+    inset: 0;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 /***** components/FileTree.js *****/
 .file-tree-container {
 }

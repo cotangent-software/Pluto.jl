@@ -6,6 +6,8 @@ import Config from '../Config.js';
 import FileTree, { transformFileTree, getTreePaths } from '../components/FileTree.js';
 import { Tabs, TabPanel } from '../ui/Tabs.js';
 import IconButton from '../ui/IconButton.js';
+import Spinner from '../ui/Spinner.js';
+import NewFile from './NewFile.js';
 
 function Editor(props) {
     const [fileTree, setFileTree] = useState({});
@@ -16,14 +18,18 @@ function Editor(props) {
     const [openTabs, setOpenTabs] = useState([]);
 
     useEffect(() => {
+        handleFileRefresh();
+    }, [setFileTree]);
+
+    function handleFileRefresh() {
+        setFileTree({});    
         fetch('/tree')
             .then(response => response.json())
             .then(data => {
                 transformFileTree(data);
                 setFileTree(data);
             });
-    }, [setFileTree]);
-
+    }
     function handleFileSelected(tree) {
         const treeId = tree.id;
         setFileSelected(treeId);
@@ -39,6 +45,7 @@ function Editor(props) {
             else {
                 const _openTabs = [ ...openTabs ];
                 _openTabs.push({
+                    type: 'frame',
                     url: `http://${Config.plutoHost}/open?path=${encodeURIComponent(path.slice(1))}`,
                     path,
                     name: path.split('/').reverse()[0]
@@ -46,6 +53,22 @@ function Editor(props) {
                 setOpenTabs(_openTabs);
                 setTabIndex(_openTabs.length-1);
             }
+        }
+    }
+    function handleFileAdd() {
+        const openTabComponents = openTabs.map(x => x.component);
+        if(openTabComponents.includes(NewFile)) {
+            setTabIndex(openTabComponents.indexOf(NewFile));
+        }
+        else {
+            const _openTabs = [ ...openTabs ];
+            _openTabs.push({
+                type: 'component',
+                component: NewFile,
+                name: "New File"
+            });
+            setOpenTabs(_openTabs);
+            setTabIndex(_openTabs.length-1);
         }
     }
     function handleTreeExpand(tree, expanded) {
@@ -65,6 +88,9 @@ function Editor(props) {
         setOpenTabs(_openTabs);
         if(idx <= tabIndex) setTabIndex(tabIndex - 1);
     }
+    function handleFrameLoad(idx) {
+        
+    }
 
     return html`
         <div class="editor-container">
@@ -72,15 +98,21 @@ function Editor(props) {
                 <div style="display: flex">
                     <${Text} variant="h4">Files</${Text}>
                     <div style="flex-grow: 1"/>
-                    <${IconButton} icon="arrow-clockwise" size=20/>
-                    <${IconButton} icon="plus"/>
+                    <${IconButton} icon="arrow-clockwise" size=20 onClick=${handleFileRefresh}/>
+                    <${IconButton} icon="plus" onClick=${handleFileAdd}/>
                 </div>
-                <${FileTree}
-                    tree=${fileTree}
-                    selected=${fileSelected}
-                    expanded=${treeExpanded}
-                    onSelect=${handleFileSelected}
-                    onExpand=${handleTreeExpand}/>
+                ${Object.keys(fileTree).length === 0 ?
+                    html`<div style="display: flex; justify-content: center" class="mt-4"><${Spinner}/></div>`
+                    :
+                    html`
+                        <${FileTree}
+                            tree=${fileTree}
+                            selected=${fileSelected}
+                            expanded=${treeExpanded}
+                            onSelect=${handleFileSelected}
+                            onExpand=${handleTreeExpand}/>
+                    `
+                }
             </div>
             <div class="editor-center"></div>
             <div class="editor-right">
@@ -89,11 +121,17 @@ function Editor(props) {
                     tabLabels="${openTabs.map(x => x.name)}"
                     onClick=${handleTabClick}
                     onClose=${handleTabClose}/>
-                ${openTabs.map((tabData, i) => {
-                    return html`<${TabPanel} tab=${tabIndex} index=${i} style="flex-grow: 1"><iframe class="pluto-frame" src="${tabData.url}"></iframe></${TabPanel}>`;
-                })}
+                ${openTabs.map((tabData, i) => (
+                    html`
+                        <${TabPanel} tab=${tabIndex} index=${i} style="flex-grow: 1; position: relative">
+                            ${tabData.type === 'frame' && html`<iframe class="pluto-frame" src="${tabData.url}" onload=${handleFrameLoad(i)}></iframe>`}
+                            ${tabData.type === 'component' && html`<${tabData.component} ...${tabData.props || {}}/>`}
+                        </${TabPanel}>
+                    `
+                ))}
             </div>
         </div>
     `;
 }
+
 export default Editor;

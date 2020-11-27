@@ -1,7 +1,6 @@
 import { html } from '../deps/Preact.js';
 
 function Container({ fluid, maxWidth, className, children, ...props}) {
-    console.log(props);
     let containerClass = 'container';
     if(fluid) {
         containerClass += '-fluid';
