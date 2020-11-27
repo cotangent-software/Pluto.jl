@@ -46,6 +46,8 @@ function cutename()
     titlecase(rand(adjectives)) * titlecase(rand(nouns))
 end
 
+makeid(n, symbols=('a':'z') ∪ ('A':'Z') ∪ ('0':'9')) = join(rand(symbols, n))
+
 function new_notebooks_directory()
     try
         path = joinpath(first(DEPOT_PATH), "pluto_notebooks")

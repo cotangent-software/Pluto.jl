@@ -8,6 +8,20 @@ import { Tabs, TabPanel } from '../ui/Tabs.js';
 import IconButton from '../ui/IconButton.js';
 import Spinner from '../ui/Spinner.js';
 import NewFile from './NewFile.js';
+import Toast from '../ui/Toast.js';
+import Alert from '../ui/Alert.js';
+
+function makeid(length) {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    for(var i=0; i < length; i++)
+    {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
+}
 
 function getOpenUrl(path) {
     return `http://${Config.plutoHost}/open?path=${encodeURIComponent(path.slice(1))}`;
@@ -25,10 +39,17 @@ function Editor(props) {
     const [openTabs, setOpenTabs] = useState([]);
 
     const [newNotebookData, setNewNotebookData] = useState(null);
+    const [globalErrors, setGlobalErrors] = useState([]);
 
     useEffect(() => {
         handleFileRefresh();
     }, [setFileTree]);
+
+    function pushError(title, message, severity='danger', timeout=10000) {
+        const _globalErrors = [ ...globalErrors ];
+        _globalErrors.push({ id: makeid(8), title, message, severity, timeout });
+        setGlobalErrors(_globalErrors);
+    }
 
     function handleFileRefresh(showLoader=true) {
         if(showLoader) {
@@ -93,6 +114,23 @@ function Editor(props) {
         _treeExpanded[tree.id] = expanded;
         setTreeExpanded(_treeExpanded);
     }
+    function handleFileMove(moveTreeId, parentTreeId, type) {
+        const paths = getTreePaths(fileTree);
+        fetch('/fileMove?' + new URLSearchParams({
+            src: paths[moveTreeId].slice(1),
+            dst: paths[parentTreeId].slice(1) + paths[moveTreeId].split('/').reverse()[type === 'directory' ? 1 : 0],
+        }))
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    handleFileRefresh(false);
+                }
+                else {
+                    pushError('File Move Error', data.error);
+                    console.log("Move error: ", data);
+                }
+            });
+    }
 
     function handleTabClick(idx) {
         if(tabIndex !== idx) {
@@ -115,6 +153,10 @@ function Editor(props) {
     }
     function handleFrameLoad(idx) {
         
+    }
+
+    function handleGlobalErrorClose(errorId) {
+        return () => setGlobalErrors([ ...globalErrors ].filter(x => x.id !== errorId));
     }
 
     if(newNotebookData) {
@@ -149,7 +191,8 @@ function Editor(props) {
                             selected=${fileSelected}
                             expanded=${treeExpanded}
                             onSelect=${handleFileSelected}
-                            onExpand=${handleTreeExpand}/>
+                            onExpand=${handleTreeExpand}
+                            onMove=${handleFileMove}/>
                     `
                 }
             </div>
@@ -167,6 +210,16 @@ function Editor(props) {
                             ${tabData.type === 'frame' && html`<iframe class="pluto-frame" src="${tabData.url}" onload=${handleFrameLoad(i)}></iframe>`}
                             ${tabData.type === 'component' && html`<${tabData.component} ...${tabData.props || {}}/>`}
                         </${TabPanel}>
+                    `
+                ))}
+            </div>
+
+            <div class="editor-global-errors">
+                ${globalErrors.map(x => (
+                    html`
+                        <${Toast} title="${x.title}" timeout="${x.timeout}" severity="${x.severity}" onClose="${handleGlobalErrorClose(x.id)}">
+                            ${x.message}
+                        </${Toast}>
                     `
                 ))}
             </div>

@@ -7,9 +7,10 @@ import JSON
 
 to_symbol_dict(d) = Dict(Symbol(k) => v for (k, v) in d)
 
-function build_file_tree(root_directory)
+function build_file_tree(root_directory, parent_id="")
     tree = Dict()
 
+    tree["id"] = parent_id * (parent_id == "" ? "" : "-") * makeid(8)
     tree["name"] = basename(root_directory)
     tree["type"] = "directory"
     tree["children"] = []
@@ -26,10 +27,11 @@ function build_file_tree(root_directory)
     end
 
     for dir = dirs
-        push!(tree["children"], build_file_tree(joinpath(root_directory, dir)))
+        push!(tree["children"], build_file_tree(joinpath(root_directory, dir), tree["id"]))
     end
     for file = files
         push!(tree["children"], Dict(
+            "id" => tree["id"] * "-" * makeid(8),
             "name" => file,
             "type" => "file"
         ))
@@ -263,6 +265,44 @@ function http_router_for(session::ServerSession)
         json_response(build_file_tree(session.options.server.notebook_root))
     end
     HTTP.@register(router, "GET", "/tree", serve_file_structure)
+
+    serve_file_move = with_authentication(;
+        required=security.require_secret_for_access ||
+        security.require_secret_for_open_links
+    ) do request::HTTP.Request
+        params = HTTP.queryparams(HTTP.URI(request.target))
+        success_response() = json_response(Dict("success" => true))
+        error_response(msg) = json_response(Dict("success" => false, "error" => msg))
+        try
+            src_path = normpath(joinpath(session.options.server.notebook_root, params["src"]))
+            dst_path = normpath(joinpath(session.options.server.notebook_root, params["dst"]))
+
+            if joinpath(src_path, "") == joinpath(dst_path, "")
+                return success_response()
+            end
+
+            notebook_paths = (x -> x.path).(values(session.notebooks))
+            nb_src_occurs = occursin.(repeat(src_path, length(notebook_paths)), notebook_paths)
+            if isdir(src_path) && length(nb_src_occurs) > 0 && sum(nb_src_occurs) > 0
+                return error_response("Folders cannot be moved while a Pluto notebook is running inside it")
+            end
+
+            mv(src_path, dst_path)
+            
+            # Change notebook path to match destination path
+            notebook_running = findall(x -> x == src_path, notebook_paths)
+            if length(notebook_running) > 0
+                nb = session.notebooks[collect(keys(session.notebooks))[notebook_running[1]]]
+                nb.path = dst_path
+            end
+
+            success_response()
+        catch e
+            error_response(string(e))
+        end
+        
+    end
+    HTTP.@register(router, "GET", "/fileMove", serve_file_move)
     
     function serve_asset(request::HTTP.Request)
         uri = HTTP.URI(request.target)

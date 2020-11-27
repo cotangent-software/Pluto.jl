@@ -23,6 +23,11 @@ html, body {
     display: flex;
     flex-direction: column;
 }
+.editor-global-errors {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+}
 
 
 /***** views/NewFile.js *****/
@@ -70,6 +75,8 @@ html, body {
 
 /***** components/FileTree.js *****/
 .file-tree-container {
+    border-radius: 5px;
+    transition: background 0.2s;
 }
 .file-tree-entry {
     margin-bottom: 0;

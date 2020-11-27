@@ -1,22 +1,52 @@
-import { html } from '../deps/Preact.js';
+import { html, useState } from '../deps/Preact.js';
 import Text from '../ui/Text.js';
 import Icon from '../ui/Icon.js';
 
-function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-
-function FileTree({ tree, selected, expanded, onSelect, onExpand, ...props }) {
+function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, ...props }) {
     function onEntryClick() {
         onSelect(tree);
         if(tree.type === 'directory') {
             onExpand(tree, !isExpanded());
+        }
+    }
+
+    function handleDragStart(e) {
+        e.dataTransfer.setData('treeId', tree.id);
+        e.dataTransfer.setData('treeType', tree.type);
+    }
+    function handleDragOver(e) {
+        e.preventDefault();
+        if(tree.type === 'directory') {
+            e.stopPropagation();
+            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.08)';
+        }
+    }
+    function handleDragLeave(e) {
+        if(tree.type === 'directory') {
+            e.currentTarget.style.background = '';
+        }
+    }
+    function handleDrop(e) {
+        if(tree.type === 'directory') {
+            e.stopPropagation();
+
+            const target = e.currentTarget;
+            target.style.background = '';
+            const moveTreeId = e.dataTransfer.getData('treeId');
+            const moveTreeType = e.dataTransfer.getData('treeType');
+
+            if(moveTreeId) {
+                // If the user attempts to move a destination inside itself
+                if(tree.id.includes(moveTreeId)) {
+                    target.style.background = 'rgba(255, 0, 0, 0.08)';
+                    setTimeout(() => {
+                        target.style.background = '';
+                    }, 500);
+                }
+                else {
+                    onMove(moveTreeId, tree.id, moveTreeType);
+                }
+            }
         }
     }
 
@@ -31,15 +61,16 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, ...props }) {
     }
     const treeChildren = tree.type === 'directory' ? tree.children.map(child => {
         return html`
-            <${FileTree} tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand}/>
+            <${FileTree} tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove}/>
         `;
     }) : [];
     return html`
-        <div class="file-tree-container">
+        <div class="file-tree-container" ondragover=${handleDragOver} ondragleave=${handleDragLeave} ondrop=${handleDrop}>
             <${Text}
                 className="${selected === tree.id ? 'file-tree-entry-selected ' : ''}file-tree-entry"
                 onclick=${onEntryClick}
                 draggable="true"
+                ondragstart=${handleDragStart}
             >
                 ${fileIcon}
                 ${tree.type === 'directory' && html`<${Icon} name="${isExpanded() ? 'caret-down' : 'caret-right'}"/>`}
@@ -52,11 +83,10 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, ...props }) {
     `;
 }
 
-export function transformFileTree(data) {
-    data.id = makeid(8);
+export function transformFileTree(data, parentId='') {
     if(data.type === 'directory') {
         for(let child of data.children) {
-            transformFileTree(child);
+            transformFileTree(child, data.id);
         }
     }
 }
@@ -92,6 +122,9 @@ export function getFileIcon(filename) {
     }
 }
 export function getTreePaths(tree, currentPath='/', paths={}) {
+    if(currentPath === '/') {
+        paths[tree.id] = currentPath;
+    }
     for(let child of tree.children) {
         if(child.type === 'directory') {
             const dirPath = currentPath + child.name + '/';
