@@ -38,6 +38,8 @@ function build_file_tree(root_directory)
     tree
 end
 
+to_notebook_root_relative(session::ServerSession, path::String) = replace(replace(path, session.options.server.notebook_root => ""), "\\" => "/")
+
 "Attempts to find the MIME pair corresponding to the extension of a filename. Defaults to `text/plain`."
 function mime_fromfilename(filename)
     # This bad boy is from: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
@@ -59,6 +61,12 @@ function asset_response(path)
     catch e
         asset_response(project_relative_path("frontend/lab", "index.html"))
     end
+end
+
+function json_response(obj)
+    response = HTTP.Response(200, JSON.json(obj));
+    push!(response.headers, "Content-Type" => "text/json")
+    response
 end
 
 function error_response(status_code::Integer, title, advice, body="")
@@ -178,7 +186,12 @@ function http_router_for(session::ServerSession)
         required=security.require_secret_for_access || 
         security.require_secret_for_open_links
     ) do request::HTTP.Request
-        notebook_redirect_response(SessionActions.new(session; to_symbol_dict(HTTP.queryparams(HTTP.URI(request.target)))...))
+        notebook = SessionActions.new(session; to_symbol_dict(HTTP.queryparams(HTTP.URI(request.target)))...)
+        println(notebook.path)
+        json_response(Dict(
+            "id" => string(notebook.notebook_id),
+            "path" => to_notebook_root_relative(session, notebook.path)
+        ))
     end
     HTTP.@register(router, "GET", "/new", serve_newfile)
 
@@ -248,10 +261,7 @@ function http_router_for(session::ServerSession)
         required=security.require_secret_for_access ||
         security.require_secret_for_open_links
     ) do request::HTTP.Request
-        tree = build_file_tree(session.options.server.notebook_root)
-        response = HTTP.Response(200, JSON.json(tree));
-        push!(response.headers, "Content-Type" => "text/json")
-        response
+        json_response(build_file_tree(session.options.server.notebook_root))
     end
     HTTP.@register(router, "GET", "/tree", serve_file_structure)
     
