@@ -87,9 +87,8 @@ let ExportBanner = ({ notebook, pluto_version, onClose, open }) => {
     //         set_html_export(null)
     //     }
     // }, [notebook, open, set_html_export])
-
     return html`
-        <aside id="export">
+        <aside id="export" style=${open ? '' : 'background: none'}>
             <div id="container">
                 <div class="export_title">export</div>
                 <a href="./notebookfile?id=${notebook.notebook_id}" target="_blank" class="export_card">
@@ -972,9 +971,9 @@ export class Editor extends Component {
                     onClose=${() => this.setState({ export_menu_open: false })}
                 />
                 <nav id="at_the_top">
-                    <a href="./">
+                    <!--<a href="./">
                         <h1><img id="logo-big" src="img/logo.svg" alt="Pluto.jl" /><img id="logo-small" src="img/favicon_unsaturated.svg" /></h1>
-                    </a>
+                    </a>-->
                     <!--<${FilePicker}
                         client=${this.client}
                         value=${this.state.notebook.in_temp_dir ? "" : this.state.notebook.path}
@@ -1068,7 +1067,7 @@ export class Editor extends Component {
                 }}
             />
             <${SlideControls} />
-            <footer>
+            <!--<footer>
                 <div id="info">
                     <form id="feedback" action="#" method="post">
                         <a href="statistics-info">Statistics</a>
@@ -1079,7 +1078,7 @@ export class Editor extends Component {
                         <button>Send</button>
                     </form>
                 </div>
-            </footer>
+            </footer>-->
         `
     }
 }

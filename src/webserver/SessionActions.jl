@@ -1,6 +1,6 @@
 module SessionActions
 
-import ..Pluto: ServerSession, Notebook, emptynotebook, tamepath, move_notebook!, update_save_run!, putnotebookupdates!, putplutoupdates!, load_notebook, clientupdate_notebook_list, WorkspaceManager, @asynclog
+import ..Pluto: ServerSession, Notebook, emptynotebook, tamepath, move_notebook!, update_save_run!, putnotebookupdates!, putplutoupdates!, load_notebook, clientupdate_notebook_list, WorkspaceManager, cutename, @asynclog
 
 struct NotebookIsRunningException <: Exception
     notebook::Notebook
@@ -41,7 +41,7 @@ function open(session::ServerSession, path::AbstractString; run_async=true, comp
 end
 
 function new(session::ServerSession; path::Union{Nothing,String}=nothing, run_async=true)
-    nb = emptynotebook((isnothing(path) ? [] : [path])...)
+    nb = emptynotebook((isnothing(path) ? [joinpath(session.options.server.notebook_root, cutename())] : [path])...)
     update_save_run!(session, nb, nb.cells; run_async=run_async, prerender_text=true)
     session.notebooks[nb.notebook_id] = nb
 

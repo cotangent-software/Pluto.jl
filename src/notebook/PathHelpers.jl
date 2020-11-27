@@ -43,7 +43,7 @@ const nouns = [
 ]
 
 function cutename()
-    titlecase(rand(adjectives)) * " " * rand(nouns)
+    titlecase(rand(adjectives)) * titlecase(rand(nouns)) * ".jl"
 end
 
 function new_notebooks_directory()

@@ -1,0 +1,116 @@
+html, body {
+    height: 100%;
+}
+
+
+/***** views/Editor.js *****/
+.editor-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+.editor-left {
+    height: 100%;
+    width: calc(30% - 1px);
+}
+.editor-center {
+    height: 100%;
+    border-right: 2px solid lightgrey;
+}
+.editor-right {
+    height: 100%;
+    width: calc(70% - 1px);
+    display: flex;
+    flex-direction: column;
+}
+
+
+/***** components/FileTree.js *****/
+.file-tree-container {
+}
+.file-tree-entry {
+    margin-bottom: 0;
+    padding-left: 5px;
+    cursor: default;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+    border-radius: 3px;
+}
+.file-tree-entry:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.file-tree-entry-selected {
+    /* background-color: #4d4de5;
+    color: white; */
+}
+.file-tree-entry-selected:hover {
+    /* background-color: #3838e2;
+    color: white; */
+}
+.file-tree-children {
+    margin-left: 13px;
+    padding-left: 12px;
+    border-left: 1px solid lightgrey;
+}
+
+
+/***** ui/Tabs.js *****/
+.tabs-container {
+    display: flex;
+    height: 30px;
+    width: 100%;
+}
+.tabs-tab {
+    display: flex;
+    height: 100%;
+    cursor: default;
+    padding: 5px 10px;
+    border-right: 1px solid lightgrey;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid lightgray;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+.tabs-tab:hover {
+    background-color: #ededed;
+}
+.tabs-tab-active, .tabs-tab-active:hover {
+    background-color: white;
+    border-bottom: none;
+}
+.tabs-tab-content {
+    justify-content: center;
+    align-items: center;
+    line-height: 100%;
+    display: flex;
+}
+
+
+/***** ui/IconButton.js *****/
+.icon-button {
+    border: none;
+    background: none;
+    border-radius: 100%;
+    outline: none;
+    padding: 0 2px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+.icon-button:focus {
+    outline: 0;
+}
+.icon-button:active {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+
+.pluto-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

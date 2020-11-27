@@ -1,13 +1,44 @@
 import HTTP
 import Markdown: htmlesc
 import UUIDs: UUID
+import JSON
 
 # Serve everything from `/frontend`, and create HTTP endpoints to open notebooks.
 
-"Attempts to find the MIME pair corresponding to the extension of a filename. Defaults to `text/plain`."
 to_symbol_dict(d) = Dict(Symbol(k) => v for (k, v) in d)
-    
 
+function build_file_tree(root_directory)
+    tree = Dict()
+
+    tree["name"] = basename(root_directory)
+    tree["type"] = "directory"
+    tree["children"] = []
+
+    files = []
+    dirs = []
+    for node = readdir(root_directory)
+        nodepath = joinpath(root_directory, node)
+        if isfile(nodepath)
+            push!(files, node)
+        else
+            push!(dirs, node)
+        end
+    end
+
+    for dir = dirs
+        push!(tree["children"], build_file_tree(joinpath(root_directory, dir)))
+    end
+    for file = files
+        push!(tree["children"], Dict(
+            "name" => file,
+            "type" => "file"
+        ))
+    end
+
+    tree
+end
+
+"Attempts to find the MIME pair corresponding to the extension of a filename. Defaults to `text/plain`."
 function mime_fromfilename(filename)
     # This bad boy is from: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
     mimepairs = Dict(".aac" => "audio/aac", ".bin" => "application/octet-stream", ".bmp" => "image/bmp", ".css" => "text/css", ".csv" => "text/csv", ".eot" => "application/vnd.ms-fontobject", ".gz" => "application/gzip", ".gif" => "image/gif", ".htm" => "text/html", ".html" => "text/html", ".ico" => "image/vnd.microsoft.icon", ".jpeg" => "image/jpeg", ".jpg" => "image/jpeg", ".js" => "text/javascript", ".json" => "application/json", ".jsonld" => "application/ld+json", ".mjs" => "text/javascript", ".mp3" => "audio/mpeg", ".mp4" => "video/mp4", ".mpeg" => "video/mpeg", ".oga" => "audio/ogg", ".ogv" => "video/ogg", ".ogx" => "application/ogg", ".opus" => "audio/opus", ".otf" => "font/otf", ".png" => "image/png", ".pdf" => "application/pdf", ".rtf" => "application/rtf", ".sh" => "application/x-sh", ".svg" => "image/svg+xml", ".tar" => "application/x-tar", ".tif" => "image/tiff", ".tiff" => "image/tiff", ".ttf" => "font/ttf", ".txt" => "text/plain", ".wav" => "audio/wav", ".weba" => "audio/webm", ".webm" => "video/webm", ".webp" => "image/webp", ".woff" => "font/woff", ".woff2" => "font/woff2", ".xhtml" => "application/xhtml+xml", ".xml" => "application/xml", ".xul" => "application/vnd.mozilla.xul+xml", ".zip" => "application/zip")
@@ -116,7 +147,7 @@ function http_router_for(session::ServerSession)
     # Access to all 'risky' endpoints is still restricted to requests that have the secret cookie, but visiting `/` is allowed, and it will set the cookie. From then on the security situation is identical to 
     #    secret_for_access == true
     HTTP.@register(router, "GET", "/", with_authentication(
-        create_serve_onefile(project_relative_path("frontend", "index.html"));
+        create_serve_onefile(project_relative_path("frontend/lab", "index.html"));
         required=security.require_secret_for_access
         ))
     HTTP.@register(router, "GET", "/edit", with_authentication(
@@ -159,7 +190,7 @@ function http_router_for(session::ServerSession)
             uri = HTTP.URI(request.target)
             query = HTTP.queryparams(uri)
             if haskey(query, "path")
-                path = tamepath(query["path"])
+                path = joinpath(session.options.server.notebook_root, query["path"])
                 if isfile(path)
                     return try_launch_notebook_response(SessionActions.open, path, title="Failed to load notebook", advice="The file <code>$(htmlesc(path))</code> could not be loaded. Please <a href='https://github.com/fonsp/Pluto.jl/issues'>report this error</a>!")
                 else
@@ -212,6 +243,17 @@ function http_router_for(session::ServerSession)
         end
     end
     HTTP.@register(router, "GET", "/notebookfile", serve_notebookfile)
+
+    serve_file_structure = with_authentication(;
+        required=security.require_secret_for_access ||
+        security.require_secret_for_open_links
+    ) do request::HTTP.Request
+        tree = build_file_tree(session.options.server.notebook_root)
+        response = HTTP.Response(200, JSON.json(tree));
+        push!(response.headers, "Content-Type" => "text/json")
+        response
+    end
+    HTTP.@register(router, "GET", "/tree", serve_file_structure)
     
     function serve_asset(request::HTTP.Request)
         uri = HTTP.URI(request.target)

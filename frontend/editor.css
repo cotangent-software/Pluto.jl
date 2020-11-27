@@ -46,12 +46,15 @@ main {
     flex: 1;
 
     max-width: calc(700px + 25px + 6px); /* 700px + both paddings */
-    padding-top: 20px;
+    padding-top: 0;
     padding-bottom: 4rem;
     padding-left: 25px;
     padding-right: 6px;
     align-content: center;
     width: 100%;
+
+    position: relative;
+    top: -20px;
 }
 
 /* | main=25px+700px+6px=731px | pluto-helpbox=350px - 500px | */
@@ -374,7 +377,6 @@ body > header {
     background-color: white;
     transform: translateY(0px);
     transition: background-color 0.5s ease-in-out, transform 0.25s cubic-bezier(0.18, 0.89, 0.49, 1.13);
-    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
 
     font-family: "Roboto Mono", monospace;
     font-weight: 400;
@@ -389,6 +391,7 @@ body > header.show_export {
     position: sticky;
     top: 0;
     transform: translateY(130px);
+    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
 }
 
 aside#export {
@@ -399,6 +402,7 @@ aside#export {
     background: rgb(60, 67, 101);
     color: rgba(255, 255, 255, 0.7);
     transform: translateY(-100%);
+    transition: background 0.3s;
 }
 aside#export::before {
     content: "";
@@ -488,6 +492,7 @@ nav#at_the_top > * {
     flex: 0 0 auto;
     align-self: center;
     margin: 10px 0px;
+    margin-left: auto;
 }
 
 nav#at_the_top > a {
