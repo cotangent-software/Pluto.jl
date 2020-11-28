@@ -9,7 +9,6 @@ import IconButton from '../ui/IconButton.js';
 import Spinner from '../ui/Spinner.js';
 import NewFile from './NewFile.js';
 import Toast from '../ui/Toast.js';
-import Alert from '../ui/Alert.js';
 
 function makeid(length) {
     var text = '';

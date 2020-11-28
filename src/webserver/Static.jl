@@ -10,7 +10,7 @@ to_symbol_dict(d) = Dict(Symbol(k) => v for (k, v) in d)
 function build_file_tree(root_directory, parent_id="")
     tree = Dict()
 
-    tree["id"] = parent_id * (parent_id == "" ? "" : "-") * makeid(8)
+    tree["id"] = parent_id * (parent_id == "" ? "" : "-") * basename(root_directory)
     tree["name"] = basename(root_directory)
     tree["type"] = "directory"
     tree["children"] = []
@@ -287,6 +287,7 @@ function http_router_for(session::ServerSession)
                 return error_response("Folders cannot be moved while a Pluto notebook is running inside it")
             end
 
+            # TODO: Possibly use SessionActions.move(session, notebook, newpath)
             mv(src_path, dst_path)
             
             # Change notebook path to match destination path
