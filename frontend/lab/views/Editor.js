@@ -9,6 +9,7 @@ import IconButton from '../ui/IconButton.js';
 import Spinner from '../ui/Spinner.js';
 import NewFile from './NewFile.js';
 import Toast from '../ui/Toast.js';
+import ResizeBar from '../components/ResizeBar.js';
 
 function makeid(length) {
     var text = '';
@@ -39,6 +40,8 @@ function Editor(props) {
 
     const [newNotebookData, setNewNotebookData] = useState(null);
     const [globalErrors, setGlobalErrors] = useState([]);
+
+    const [editorLeftWidth, setEditorLeftWidth] = useState(parseInt(localStorage.getItem('filesWidth') || '300'));
 
     useEffect(() => {
         handleFileRefresh();
@@ -154,6 +157,13 @@ function Editor(props) {
         
     }
 
+    function onViewResize(mx, my) {
+        if(mx > 200) {
+            setEditorLeftWidth(mx);
+            localStorage.setItem('filesWidth', mx);
+        }
+    }
+
     function handleGlobalErrorClose(errorId) {
         return () => setGlobalErrors([ ...globalErrors ].filter(x => x.id !== errorId));
     }
@@ -174,7 +184,7 @@ function Editor(props) {
 
     return html`
         <div class="editor-container">
-            <div class="editor-left p-3 pl-4">
+            <div class="editor-left p-3 pl-4" style="width: ${editorLeftWidth}px">
                 <div style="display: flex">
                     <${Text} variant="h4">Files</${Text}>
                     <div style="flex-grow: 1"/>
@@ -195,7 +205,9 @@ function Editor(props) {
                     `
                 }
             </div>
-            <div class="editor-center"></div>
+            <div class="editor-center">
+                <${ResizeBar.Vertical} onChange=${onViewResize}/>
+            </div>
             <div class="editor-right">
                 <${Tabs}
                     tab="${tabIndex}"

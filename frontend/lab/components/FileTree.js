@@ -1,4 +1,4 @@
-import { html, useState } from '../deps/Preact.js';
+import { html } from '../deps/Preact.js';
 import Text from '../ui/Text.js';
 import Icon from '../ui/Icon.js';
 

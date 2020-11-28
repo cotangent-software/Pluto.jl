@@ -11,16 +11,15 @@ html, body {
 }
 .editor-left {
     height: 100%;
-    width: calc(30% - 1px);
+    overflow-y: auto;
 }
 .editor-center {
     height: 100%;
-    border-right: 2px solid lightgrey;
 }
 .editor-right {
     height: 100%;
-    width: calc(70% - 1px);
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
 }
 .editor-global-errors {
@@ -85,6 +84,9 @@ html, body {
     transition: background-color 0.2s, color 0.2s;
     user-select: none;
     border-radius: 3px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 .file-tree-entry:hover {
     background-color: rgba(0, 0, 0, 0.05);
@@ -101,6 +103,28 @@ html, body {
     margin-left: 13px;
     padding-left: 12px;
     border-left: 1px solid lightgrey;
+}
+
+
+/***** components/ResizeBar.js *****/
+.resize-bar-container {
+    height: 100%;
+    width: 0;
+    position: relative;
+}
+.resize-bar-left, .resize-bar-right {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    cursor: ew-resize;
+    user-select: none;
+}
+.resize-bar-left {
+    left: -4px;
+    border-right: 2px solid lightgrey;
+}
+.resize-bar-right {
+    right: -4px;
 }
 
 
