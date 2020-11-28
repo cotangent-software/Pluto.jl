@@ -59,6 +59,10 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, ...pro
     if(tree.type === 'file') {
         fileIcon = html`<${Icon} name="${getFileIcon(tree.name)}"/>`;
     }
+    let dotIcon = null;
+    if(tree.type === 'file' && tree.running) {
+        dotIcon = html`<div style="width: 0; height: 0; position: relative"><${Icon} style="position: relative; top: -16px; left: -21.5px;" name="dot" size=32/></div>`;
+    }
     const treeChildren = tree.type === 'directory' ? tree.children.map(child => {
         return html`
             <${FileTree} tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove}/>
@@ -72,6 +76,7 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, ...pro
                 draggable="true"
                 ondragstart=${handleDragStart}
             >
+                ${dotIcon}
                 ${fileIcon}
                 ${tree.type === 'directory' && html`<${Icon} name="${isExpanded() ? 'caret-down' : 'caret-right'}"/>`}
                 <span class="ml-1">${tree.name}</span>

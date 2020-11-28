@@ -86,6 +86,9 @@ function Editor(props) {
                 });
                 setOpenTabs(_openTabs);
                 setTabIndex(_openTabs.length-1);
+
+                // TODO: Attach this to a socket event from Pluto endpoint
+                setTimeout(() => handleFileRefresh(false), 1000);
             }
         }
     }

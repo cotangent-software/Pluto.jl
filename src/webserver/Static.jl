@@ -7,7 +7,7 @@ import JSON
 
 to_symbol_dict(d) = Dict(Symbol(k) => v for (k, v) in d)
 
-function build_file_tree(root_directory, parent_id="")
+function build_file_tree(session, root_directory, parent_id="")
     tree = Dict()
 
     tree["id"] = parent_id * (parent_id == "" ? "" : "-") * basename(root_directory)
@@ -27,13 +27,14 @@ function build_file_tree(root_directory, parent_id="")
     end
 
     for dir = dirs
-        push!(tree["children"], build_file_tree(joinpath(root_directory, dir), tree["id"]))
+        push!(tree["children"], build_file_tree(session, joinpath(root_directory, dir), tree["id"]))
     end
     for file = files
         push!(tree["children"], Dict(
             "id" => tree["id"] * "-" * makeid(8),
             "name" => file,
-            "type" => "file"
+            "type" => "file",
+            "running" => joinpath(root_directory, file) ∈ (x -> x.path).(values(session.notebooks))
         ))
     end
 
@@ -262,7 +263,7 @@ function http_router_for(session::ServerSession)
         required=security.require_secret_for_access ||
         security.require_secret_for_open_links
     ) do request::HTTP.Request
-        json_response(build_file_tree(session.options.server.notebook_root))
+        json_response(build_file_tree(session, session.options.server.notebook_root))
     end
     HTTP.@register(router, "GET", "/tree", serve_file_structure)
 
