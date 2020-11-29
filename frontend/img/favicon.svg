@@ -1,87 +1,48 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="60mm"
-   height="60mm"
-   viewBox="0 0 60.000004 60"
-   version="1.1"
-   id="svg8"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="favicon.svg"
-   inkscape:export-filename="C:\dev\julia\Pluto.jl\frontend\favicon.png"
-   inkscape:export-xdpi="216.75"
-   inkscape:export-ydpi="216.75">
-  <defs
-     id="defs2" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="5.6"
-     inkscape:cx="55.88897"
-     inkscape:cy="124.61243"
-     inkscape:document-units="mm"
-     inkscape:current-layer="g51"
-     showgrid="false"
-     inkscape:window-width="3200"
-     inkscape:window-height="1734"
-     inkscape:window-x="1911"
-     inkscape:window-y="-9"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata5">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-216.86406,-119.74536)">
-    <g
-       transform="matrix(1.1788204,0,0,1.1788204,-63.080613,-42.644382)"
-       id="layer1-0"
-       inkscape:label="Layer 1">
-      <g
-         transform="matrix(0.66542322,0,0,0.66542322,140.88249,87.132493)"
-         id="g51">
-        <circle
-           style="fill:#c93d39;stroke:#c93d39;stroke-width:3;fill-opacity:1"
-           cx="183.41008"
-           cy="134.56754"
-           r="16.5"
-           id="circle18" />
-        <circle
-           style="fill:#945bb0;stroke:#945bb0;stroke-width:3;fill-opacity:1"
-           cx="183.41008"
-           cy="114.32245"
-           r="16.5"
-           id="circle22" />
-        <circle
-           style="fill:#3b972e;stroke:#3b972e;stroke-width:3;fill-opacity:1"
-           cx="183.41008"
-           cy="94.077362"
-           r="16.5"
-           id="circle20" />
-      </g>
-    </g>
-  </g>
+<svg width="186" height="186" viewBox="0 0 186 186" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d)">
+<ellipse cx="93" cy="135" rx="27" ry="28" fill="#E44A45" fill-opacity="0.9"/>
+<path d="M117.5 135C117.5 149.17 106.446 160.5 93 160.5C79.5539 160.5 68.5 149.17 68.5 135C68.5 120.83 79.5539 109.5 93 109.5C106.446 109.5 117.5 120.83 117.5 135Z" stroke="#C93D39" stroke-width="5"/>
+</g>
+<g filter="url(#filter1_d)">
+<ellipse cx="93" cy="100.5" rx="27" ry="27.5" fill="#A666C6" fill-opacity="0.9"/>
+<path d="M117.5 100.5C117.5 114.351 106.488 125.5 93 125.5C79.5121 125.5 68.5 114.351 68.5 100.5C68.5 86.6494 79.5121 75.5 93 75.5C106.488 75.5 117.5 86.6494 117.5 100.5Z" stroke="#945BB0" stroke-width="5"/>
+</g>
+<g filter="url(#filter2_d)">
+<ellipse cx="93" cy="66" rx="27" ry="28" fill="#43AE34" fill-opacity="0.9"/>
+<path d="M117.5 66C117.5 80.1697 106.446 91.5 93 91.5C79.5539 91.5 68.5 80.1697 68.5 66C68.5 51.8303 79.5539 40.5 93 40.5C106.446 40.5 117.5 51.8303 117.5 66Z" stroke="#3B972E" stroke-width="5"/>
+</g>
+<circle cx="84" cy="24" r="8" fill="#C93D39"/>
+<path d="M101 8C101 12.4183 97.4183 16 93 16C88.5817 16 85 12.4183 85 8C85 3.58172 88.5817 0 93 0C97.4183 0 101 3.58172 101 8Z" fill="#3B972E"/>
+<circle cx="102" cy="24" r="8" fill="#945BB0"/>
+<path d="M52 35V133.932C52 133.932 52 179.915 93.5 178.986" stroke="black" stroke-width="13"/>
+<path d="M135 35V133.932C135 133.932 135 179.915 93.5 178.986" stroke="black" stroke-width="13"/>
+<defs>
+<filter id="filter0_d" x="62" y="107" width="62" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+</filter>
+<filter id="filter1_d" x="62" y="73" width="62" height="63" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+</filter>
+<filter id="filter2_d" x="62" y="38" width="62" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+</filter>
+</defs>
 </svg>

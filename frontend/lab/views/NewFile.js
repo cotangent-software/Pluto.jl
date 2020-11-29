@@ -75,7 +75,7 @@ function NewFile({ onCreate=(d)=>{}, defaultFileName, ...props }) {
             <${Container}>
                 <${Grid.Row}>
                     <${Grid.Col} sm=6>
-                        <${NewFileButton} onClick=${handleCreatePlutoNotebook} backgroundImage="/img/favicon.svg">${loading ? html`<${Spinner}/>` : 'Pluto Notebook'}</${NewFileButton}>
+                        <${NewFileButton} onClick=${handleCreatePlutoNotebook} backgroundImage="/img/favicon_pluto.svg">${loading ? html`<${Spinner}/>` : 'Pluto Notebook'}</${NewFileButton}>
                     </${Grid.Col}>
                     <${Grid.Col} sm=6>
                         <${NewFileButton} backgroundImage="/lab/deps/bootstrap-icons/file-earmark-text.svg" backgroundOpacity=0.1>Text File</${NewFileButton}>
