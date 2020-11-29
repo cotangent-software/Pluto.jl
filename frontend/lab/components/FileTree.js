@@ -41,11 +41,13 @@ function FileTree({ tree, selected, editing, expanded, onSelect, onExpand, onMov
                         { name: 'Paste', action: noop, visible: treeNode.type === 'directory' },
                         { name: 'Copy Path', action: noop }
                     ])
-                    elements.push({});
-                    elements.push(...[
-                        { name: 'Rename', action: editorActions.beginTreeRename, payload: [ treeNode ] },
-                        { name: 'Delete', action: noop }
-                    ]);
+                    if(notRoot) {
+                        elements.push({});
+                        elements.push(...[
+                            { name: 'Rename', action: editorActions.beginTreeRename, payload: [ treeNode ] },
+                            { name: 'Delete', action: noop }
+                        ]);
+                    }
                 }
                 onContextMenu({
                     position: { x: e.clientX, y: e.clientY },

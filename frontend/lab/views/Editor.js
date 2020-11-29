@@ -156,7 +156,9 @@ function Editor(props) {
     }
     function handleTreeRenameEnd(tree, newName) {
         const paths = getTreePaths(fileTree);
-        FileTreeService.moveFile(paths[tree.id], FileTreeService.getDirPath(paths[tree.id]) + newName)
+        const pathSplit = paths[tree.id].split('/');
+        const dstPath = tree.type === 'file' ? FileTreeService.getDirPath(paths[tree.id]) + newName : pathSplit.slice(0, pathSplit.length-2).join('/') + '/' + newName + '/';
+        FileTreeService.moveFile(paths[tree.id], dstPath)
             .then(res => {
                 setFileEditing('');
                 handleFileRefresh(false);
