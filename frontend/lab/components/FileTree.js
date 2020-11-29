@@ -1,13 +1,48 @@
 import { html } from '../deps/Preact.js';
 import Text from '../ui/Text.js';
 import Icon from '../ui/Icon.js';
+import EventUtils from '../utils/EventUtils.js';
+import { ContextMenuDivider, ContextMenuItem } from './ContextMenu.js';
 
-function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, ...props }) {
+function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoot, onContextMenu, ...props }) {
     function onEntryClick() {
         onSelect(tree);
         if(tree.type === 'directory') {
             onExpand(tree, !isExpanded());
         }
+    }
+
+    function handleMouseUp(treeNode) {
+        return e => {
+            if(EventUtils.rightMousePressed(e)) {
+                e.stopPropagation();
+                const noop = () => {};
+                const elements = [];
+                if(treeNode.type === 'file') elements.push({ name: 'Open', action: noop });
+                if(treeNode.type === 'directory' || treeNode.type === undefined) {
+                    elements.push({ name: 'New File', action: noop });
+                    elements.push({ name: 'New Folder', action: noop });
+                    treeNode.type && elements.push({});
+                }
+                if(treeNode.type) {
+                    elements.push(...[
+                        { name: 'Cut', action: noop },
+                        { name: 'Copy', action: noop },
+                        { name: 'Paste', action: noop, visible: treeNode.type === 'directory' },
+                        { name: 'Copy Path', action: noop }
+                    ])
+                    elements.push({});
+                    elements.push(...[
+                        { name: 'Rename', action: noop },
+                        { name: 'Delete', action: noop }
+                    ]);
+                }
+                onContextMenu({
+                    position: { x: e.clientX, y: e.clientY },
+                    elements
+                });
+            }
+        };
     }
 
     function handleDragStart(e) {
@@ -65,16 +100,23 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, ...pro
     }
     const treeChildren = tree.type === 'directory' ? tree.children.map(child => {
         return html`
-            <${FileTree} tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove}/>
+            <${FileTree} notRoot="true" tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove} onContextMenu=${onContextMenu} onmouseup=${handleMouseUp(tree)}/>
         `;
     }) : [];
     return html`
-        <div class="file-tree-container" ondragover=${handleDragOver} ondragleave=${handleDragLeave} ondrop=${handleDrop}>
+        <div class="file-tree-container"
+            ondragover=${handleDragOver}
+            ondragleave=${handleDragLeave}
+            ondrop=${handleDrop} 
+            onmouseup=${notRoot ? () => {} : handleMouseUp({})}
+            ...${props}
+        >
             <${Text}
                 className="${selected === tree.id ? 'file-tree-entry-selected ' : ''}file-tree-entry"
                 onclick=${onEntryClick}
                 draggable="true"
                 ondragstart=${handleDragStart}
+                onmouseup=${handleMouseUp(tree)}
             >
                 ${dotIcon}
                 ${fileIcon}

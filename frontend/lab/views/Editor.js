@@ -1,8 +1,5 @@
 import { html, useState, useEffect } from '../deps/Preact.js';
-import Container from '../ui/Container.js';
-import Grid from '../ui/Grid.js';
 import Text from '../ui/Text.js';
-import Config from '../Config.js';
 import FileTree, { transformFileTree, getTreePaths } from '../components/FileTree.js';
 import { Tabs, TabPanel } from '../ui/Tabs.js';
 import IconButton from '../ui/IconButton.js';
@@ -10,6 +7,8 @@ import Spinner from '../ui/Spinner.js';
 import NewFile from './NewFile.js';
 import Toast from '../ui/Toast.js';
 import ResizeBar from '../components/ResizeBar.js';
+import ContextMenu, { ContextMenuDivider, ContextMenuItem } from '../components/ContextMenu.js';
+import FileTreeService from '../services/FileTreeService.js';
 
 function makeid(length) {
     var text = '';
@@ -24,13 +23,15 @@ function makeid(length) {
 }
 
 function getOpenUrl(path) {
-    return `http://${Config.plutoHost}/open?path=${encodeURIComponent(path.slice(1))}`;
+    return `/open?path=${encodeURIComponent(path.slice(1))}`;
 }
 function getNameFromPath(path) {
     return path.split('/').reverse()[0];
 }
 
 function Editor(props) {
+    const [contextMenuData, setContextMenuData] = useState(null);
+
     const [fileTree, setFileTree] = useState({});
     const [fileSelected, setFileSelected] = useState('');
     const [treeExpanded, setTreeExpanded] = useState({});
@@ -42,6 +43,20 @@ function Editor(props) {
     const [globalErrors, setGlobalErrors] = useState([]);
 
     const [editorLeftWidth, setEditorLeftWidth] = useState(parseInt(localStorage.getItem('filesWidth') || '300'));
+
+    useEffect(() => {
+        function handleContextMenu(e) {
+            // Leave context menu handling up to the individual components of the editor
+            e.preventDefault();
+            return false;
+        }
+        window.addEventListener('contextmenu', handleContextMenu);
+        window.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            window.removeEventListener('contextmenu', handleContextMenu)
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    });
 
     useEffect(() => {
         handleFileRefresh();
@@ -57,8 +72,7 @@ function Editor(props) {
         if(showLoader) {
             setFileTree({});    
         }
-        fetch('/tree')
-            .then(response => response.json())
+        FileTreeService.getTree()
             .then(data => {
                 transformFileTree(data);
                 setFileTree(data);
@@ -121,20 +135,23 @@ function Editor(props) {
     }
     function handleFileMove(moveTreeId, parentTreeId, type) {
         const paths = getTreePaths(fileTree);
-        fetch('/fileMove?' + new URLSearchParams({
-            src: paths[moveTreeId].slice(1),
-            dst: paths[parentTreeId].slice(1) + paths[moveTreeId].split('/').reverse()[type === 'directory' ? 1 : 0],
-        }))
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    handleFileRefresh(false);
-                }
-                else {
-                    pushError('File Move Error', data.error);
-                    console.log("Move error: ", data);
-                }
-            });
+        FileTreeService.moveFile(
+            FileTreeService.normalizePath(paths[moveTreeId]),
+            FileTreeService.normalizePath(paths[parentTreeId]) + FileTreeService.getFileName(paths[moveTreeId])
+        ).then(res => {
+            handleFileRefresh(false);
+        }).catch(err => {
+            pushError('File Move Error', err);
+            console.log("Move error: ", err);
+        })
+    }
+    function handleContextMenu(menuData) {
+        setContextMenuData(menuData);
+    }
+    function handleMouseUp(e) {
+        if(contextMenuData) {
+            setContextMenuData(null);
+        }
     }
 
     function handleTabClick(idx) {
@@ -204,7 +221,8 @@ function Editor(props) {
                             expanded=${treeExpanded}
                             onSelect=${handleFileSelected}
                             onExpand=${handleTreeExpand}
-                            onMove=${handleFileMove}/>
+                            onMove=${handleFileMove}
+                            onContextMenu=${handleContextMenu}/>
                     `
                 }
             </div>
@@ -237,6 +255,19 @@ function Editor(props) {
                     `
                 ))}
             </div>
+
+            ${ contextMenuData ?
+                html`
+                    <${ContextMenu} x=${contextMenuData.position.x} y=${contextMenuData.position.y}>
+                        ${contextMenuData.elements.map(el => (
+                            Object.keys(el).length > 0 ?
+                            html`<${ContextMenuItem} onClick=${el.action}>${el.name}</${ContextMenuItem}>`
+                            :
+                            html`<${ContextMenuDivider}/>`
+                        ))}
+                    </${ContextMenu}>
+                `
+            : ''}
         </div>
     `;
 }
