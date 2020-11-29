@@ -1,7 +1,7 @@
 import { html } from '../deps/Preact.js';
 
 function ContextMenuItem({ children, onClick, ...props }) {
-    return html`<a class="dropdown-item" href="javascript:;" style="transition: background 0.2s" onclick=${onClick}>${children}</a>`;
+    return html`<a class="dropdown-item" href="javascript:;" style="transition: background 0.2s" onmousedown=${onClick}>${children}</a>`;
 }
 
 function ContextMenuDivider({ ...props }) {

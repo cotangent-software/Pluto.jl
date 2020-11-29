@@ -2,9 +2,9 @@ import { html } from '../deps/Preact.js';
 import Text from '../ui/Text.js';
 import Icon from '../ui/Icon.js';
 import EventUtils from '../utils/EventUtils.js';
-import { ContextMenuDivider, ContextMenuItem } from './ContextMenu.js';
+import FileTreeService from '../services/FileTreeService.js';
 
-function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoot, onContextMenu, ...props }) {
+function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoot, onContextMenu, editorActions, ...props }) {
     function onEntryClick() {
         onSelect(tree);
         if(tree.type === 'directory') {
@@ -18,9 +18,9 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
                 e.stopPropagation();
                 const noop = () => {};
                 const elements = [];
-                if(treeNode.type === 'file') elements.push({ name: 'Open', action: noop });
+                if(treeNode.type === 'file') elements.push({ name: 'Open', action: editorActions.openFile, payload: [ treeNode ] });
                 if(treeNode.type === 'directory' || treeNode.type === undefined) {
-                    elements.push({ name: 'New File', action: noop });
+                    elements.push({ name: 'New File', action: editorActions.newFile, payload: [ treeNode.type === undefined ? tree : treeNode ] });
                     elements.push({ name: 'New Folder', action: noop });
                     treeNode.type && elements.push({});
                 }
@@ -100,7 +100,7 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
     }
     const treeChildren = tree.type === 'directory' ? tree.children.map(child => {
         return html`
-            <${FileTree} notRoot="true" tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove} onContextMenu=${onContextMenu} onmouseup=${handleMouseUp(tree)}/>
+            <${FileTree} notRoot="true" tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove} onContextMenu=${onContextMenu} editorActions=${editorActions} onmouseup=${handleMouseUp(tree)}/>
         `;
     }) : [];
     return html`
@@ -170,12 +170,12 @@ export function getFileIcon(filename) {
 }
 export function getTreePaths(tree, currentPath='/', paths={}) {
     if(currentPath === '/') {
-        paths[tree.id] = currentPath;
+        paths[tree.id] = '';
     }
     for(let child of tree.children) {
         if(child.type === 'directory') {
             const dirPath = currentPath + child.name + '/';
-            paths[child.id] = dirPath;
+            paths[child.id] = FileTreeService.normalizePath(dirPath);
             getTreePaths(child, dirPath, paths);
         }
         else {

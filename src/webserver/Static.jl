@@ -51,9 +51,17 @@ function mime_fromfilename(filename)
     MIME(mimepairs[file_extension])
 end
 
+trial_extensions = ["html", "js", "css"]
 function asset_response(path)
-    if !isfile(path) && !endswith(path, ".html")
-        return asset_response(path * ".html")
+    default_asset = project_relative_path("frontend/lab", "index.html")
+    if !isfile(path)
+        for ext = trial_extensions
+            ext_path = path * "." * ext
+            if isfile(ext_path)
+                return asset_response(ext_path)
+            end
+        end
+        return asset_response(default_asset)
     end
     try
         @assert isfile(path)
@@ -62,7 +70,7 @@ function asset_response(path)
         push!(response.headers, "Access-Control-Allow-Origin" => "*")
         response
     catch e
-        asset_response(project_relative_path("frontend/lab", "index.html"))
+        asset_response(default_asset)
     end
 end
 

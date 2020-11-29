@@ -1,3 +1,4 @@
+import { useEffect } from '../../imports/Preact.js';
 import { html, useState } from '../deps/Preact.js';
 import Alert from '../ui/Alert.js';
 import Container from '../ui/Container.js';
@@ -16,7 +17,7 @@ function NewFileButton({ children, onClick, backgroundImage='', backgroundOpacit
     `;
 }
 
-function NewFile({ onCreate=(d)=>{}, ...props }) {
+function NewFile({ onCreate=(d)=>{}, defaultFileName, ...props }) {
     const [loading, setLoading] = useState(false);
     const [fileName, setFileName] = useState('');
     const [showExtensionWarning, setShowExtensionWarning] = useState(false);
@@ -33,7 +34,7 @@ function NewFile({ onCreate=(d)=>{}, ...props }) {
     }
 
     function correctedFileName(fileName) {
-        if(fileName.slice(fileName.length-3, fileName.length) !== '.jl') {
+        if(fileName.slice(fileName.length-3, fileName.length) !== '.jl' && !['/', '\\'].includes(fileName.charAt(fileName.length-1))) {
             return fileName + (fileName.charAt(fileName.length-1) === '.' ? '' : '.') + 'jl';
         }
         return fileName;
@@ -50,6 +51,12 @@ function NewFile({ onCreate=(d)=>{}, ...props }) {
                 setLoading(false);
             });
     }
+
+    useEffect(() => {
+        if(defaultFileName !== undefined) {
+            setFileName(defaultFileName);
+        }
+    }, [defaultFileName]);
 
     return html`
         <div class="new-file-root pt-5">

@@ -41,7 +41,10 @@ function open(session::ServerSession, path::AbstractString; run_async=true, comp
 end
 
 function new(session::ServerSession; path::Union{Nothing,String}=nothing, run_async=true)
-    nb = emptynotebook([joinpath(session.options.server.notebook_root, isnothing(path) ? (cutename() * ".jl") : path)]...)
+    if isnothing(path)
+        path = ""
+    end
+    nb = emptynotebook([normpath(joinpath(session.options.server.notebook_root, isdir(joinpath(session.options.server.notebook_root, path)) ? path * (cutename() * ".jl") : path))]...)
     update_save_run!(session, nb, nb.cells; run_async=run_async, prerender_text=true)
     session.notebooks[nb.notebook_id] = nb
 

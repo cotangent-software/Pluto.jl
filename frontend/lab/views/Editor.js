@@ -106,20 +106,25 @@ function Editor(props) {
             }
         }
     }
-    function handleFileAdd() {
+    function handleFileAdd(treeNode = null) {
+        const paths = getTreePaths(fileTree);
         const openTabComponents = openTabs.map(x => x.component);
+        const _openTabs = [ ...openTabs ];
+        const newFileProps = {
+            onCreate: handleFileCreate,
+            defaultFileName: treeNode ? paths[treeNode.id] : ''
+        };
         if(openTabComponents.includes(NewFile)) {
-            setTabIndex(openTabComponents.indexOf(NewFile));
+            const newFileIndex = openTabComponents.indexOf(NewFile);
+            setTabIndex(newFileIndex);
+            _openTabs[newFileIndex].props = newFileProps;
         }
         else {
-            const _openTabs = [ ...openTabs ];
             _openTabs.push({
                 type: 'component',
                 component: NewFile,
                 name: "New File",
-                props: {
-                    onCreate: handleFileCreate
-                }
+                props: newFileProps
             });
             setOpenTabs(_openTabs);
             setTabIndex(_openTabs.length-1);
@@ -202,6 +207,12 @@ function Editor(props) {
         setNewNotebookData(null);
     }
 
+    
+    const editorActions = {
+        newFile: handleFileAdd,
+        openFile: handleFileSelected
+    };
+
     return html`
         <div class="editor-container">
             <div class="editor-left p-3 pl-4" style="width: ${editorLeftWidth}px">
@@ -222,7 +233,8 @@ function Editor(props) {
                             onSelect=${handleFileSelected}
                             onExpand=${handleTreeExpand}
                             onMove=${handleFileMove}
-                            onContextMenu=${handleContextMenu}/>
+                            onContextMenu=${handleContextMenu}
+                            editorActions=${editorActions}/>
                     `
                 }
             </div>
@@ -261,7 +273,7 @@ function Editor(props) {
                     <${ContextMenu} x=${contextMenuData.position.x} y=${contextMenuData.position.y}>
                         ${contextMenuData.elements.map(el => (
                             Object.keys(el).length > 0 ?
-                            html`<${ContextMenuItem} onClick=${el.action}>${el.name}</${ContextMenuItem}>`
+                            html`<${ContextMenuItem} onClick=${() => el.action(...(el.payload || []))}>${el.name}</${ContextMenuItem}>`
                             :
                             html`<${ContextMenuDivider}/>`
                         ))}
