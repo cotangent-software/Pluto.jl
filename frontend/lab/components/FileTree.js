@@ -1,10 +1,20 @@
-import { html } from '../deps/Preact.js';
+import { html, useRef, useEffect } from '../deps/Preact.js';
 import Text from '../ui/Text.js';
 import Icon from '../ui/Icon.js';
 import EventUtils from '../utils/EventUtils.js';
 import FileTreeService from '../services/FileTreeService.js';
+import {  } from '../../imports/Preact.js';
 
-function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoot, onContextMenu, editorActions, ...props }) {
+function FileTree({ tree, selected, editing, expanded, onSelect, onExpand, onMove, notRoot, onContextMenu, editorActions, ...props }) {
+    const editRef = useRef();
+
+    useEffect(() => {
+        if(editRef.current) {
+            editRef.current.focus();
+            editRef.current.select();
+        }
+    }, [editRef, editing]);
+
     function onEntryClick() {
         onSelect(tree);
         if(tree.type === 'directory') {
@@ -33,7 +43,7 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
                     ])
                     elements.push({});
                     elements.push(...[
-                        { name: 'Rename', action: noop },
+                        { name: 'Rename', action: editorActions.beginTreeRename, payload: [ treeNode ] },
                         { name: 'Delete', action: noop }
                     ]);
                 }
@@ -85,6 +95,20 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
         }
     }
 
+    function handleDoneEditing() {
+        if(editRef.current) {
+            editorActions.endTreeRename(tree, editRef.current.value);
+        }
+    }
+    function handleEditKey(e) {
+        if(EventUtils.enterPressed(e)) {
+            handleDoneEditing();
+        }
+        if(EventUtils.escapePressed(e)) {
+            editorActions.cancelTreeRename();
+        }
+    }
+
     function isExpanded(id) {
         id = id || tree.id;
         return expanded[tree.id] === undefined ? true : expanded[tree.id];
@@ -100,9 +124,12 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
     }
     const treeChildren = tree.type === 'directory' ? tree.children.map(child => {
         return html`
-            <${FileTree} notRoot="true" tree=${child} selected=${selected} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove} onContextMenu=${onContextMenu} editorActions=${editorActions} onmouseup=${handleMouseUp(tree)}/>
+            <${FileTree} notRoot="true" tree=${child} selected=${selected} editing=${editing} expanded=${expanded} onSelect=${onSelect} onExpand=${onExpand} onMove=${onMove} onContextMenu=${onContextMenu} editorActions=${editorActions} onmouseup=${handleMouseUp(tree)}/>
         `;
     }) : [];
+
+    const thisEditing = editing === tree.id;
+
     return html`
         <div class="file-tree-container"
             ondragover=${handleDragOver}
@@ -114,14 +141,26 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
             <${Text}
                 className="${selected === tree.id ? 'file-tree-entry-selected ' : ''}file-tree-entry"
                 onclick=${onEntryClick}
-                draggable="true"
+                draggable=${!thisEditing}
                 ondragstart=${handleDragStart}
                 onmouseup=${handleMouseUp(tree)}
             >
                 ${dotIcon}
                 ${fileIcon}
                 ${tree.type === 'directory' && html`<${Icon} name="${isExpanded() ? 'caret-down' : 'caret-right'}"/>`}
-                <span class="ml-1">${tree.name}</span>
+                <span class="file-tree-label-span ml-1">
+                    ${thisEditing ?
+                        html`<input
+                            ref=${editRef}
+                            class="file-tree-input"
+                            type="text" value="${tree.name}"
+                            onclick="${e => e.stopPropagation()}"
+                            onkeyup=${handleEditKey}
+                            onblur=${handleDoneEditing}/>`
+                        :
+                        tree.name
+                    }
+                </span>
             </${Text}>
             <div class="file-tree-children" style="display: ${isExpanded() ? 'block' : 'none'}">
                 ${treeChildren}
@@ -130,10 +169,10 @@ function FileTree({ tree, selected, expanded, onSelect, onExpand, onMove, notRoo
     `;
 }
 
-export function transformFileTree(data, parentId='') {
+export function transformFileTree(data) {
     if(data.type === 'directory') {
         for(let child of data.children) {
-            transformFileTree(child, data.id);
+            transformFileTree(child);
         }
     }
 }

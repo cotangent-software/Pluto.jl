@@ -107,6 +107,15 @@ html, body {
     padding-left: 12px;
     border-left: 1px solid lightgrey;
 }
+.file-tree-label-span {
+    width: 100%;
+}
+.file-tree-input {
+    width: 100%;
+    height: 20px;
+    background: none;
+    border: none;
+}
 
 
 /***** components/ResizeBar.js *****/

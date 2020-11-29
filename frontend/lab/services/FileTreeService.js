@@ -2,6 +2,10 @@ function normalizePath(path) {
     if(['/', '\\'].includes(path.charAt(0))) return path.slice(1);
     return path;
 }
+function getDirPath(path) {
+    const s = path.split('/');
+    return s.slice(0, s.length - 1).join('/') + '/';
+}
 function getFileName(path) {
     const reversedSplit = path.split('/').reverse();
     return reversedSplit[reversedSplit[0] === '' ? 1 : 0]
@@ -34,4 +38,4 @@ function moveFile(src, dst) {
     });
 }
 
-export default { normalizePath, getFileName, getTree, moveFile };
+export default { normalizePath, getDirPath, getFileName, getTree, moveFile };

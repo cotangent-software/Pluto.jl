@@ -34,6 +34,7 @@ function Editor(props) {
 
     const [fileTree, setFileTree] = useState({});
     const [fileSelected, setFileSelected] = useState('');
+    const [fileEditing, setFileEditing] = useState('');
     const [treeExpanded, setTreeExpanded] = useState({});
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -147,8 +148,23 @@ function Editor(props) {
             handleFileRefresh(false);
         }).catch(err => {
             pushError('File Move Error', err);
-            console.log("Move error: ", err);
-        })
+            console.log('Move error: ', err);
+        });
+    }
+    function handleTreeRenameStart(tree) {
+        setFileEditing(tree.id);
+    }
+    function handleTreeRenameEnd(tree, newName) {
+        const paths = getTreePaths(fileTree);
+        FileTreeService.moveFile(paths[tree.id], FileTreeService.getDirPath(paths[tree.id]) + newName)
+            .then(res => {
+                setFileEditing('');
+                handleFileRefresh(false);
+            })
+            .catch(err => {
+                pushError('File Rename Error', err);
+                console.log('Rename error: ', err);
+            });
     }
     function handleContextMenu(menuData) {
         setContextMenuData(menuData);
@@ -210,7 +226,10 @@ function Editor(props) {
     
     const editorActions = {
         newFile: handleFileAdd,
-        openFile: handleFileSelected
+        openFile: handleFileSelected,
+        beginTreeRename: handleTreeRenameStart,
+        endTreeRename: handleTreeRenameEnd,
+        cancelTreeRename: () => setFileEditing('')
     };
 
     return html`
@@ -229,6 +248,7 @@ function Editor(props) {
                         <${FileTree}
                             tree=${fileTree}
                             selected=${fileSelected}
+                            editing=${fileEditing}
                             expanded=${treeExpanded}
                             onSelect=${handleFileSelected}
                             onExpand=${handleTreeExpand}
